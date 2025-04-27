@@ -4,6 +4,7 @@ services:
     build:
       context: ./Database
     environment:
+      ACCEPT_EULA: "Y" 
       SA_PASSWORD: ${DB_PASSWORD}
       MSSQL_SA_PASSWORD: ${DB_PASSWORD}
     ports:
