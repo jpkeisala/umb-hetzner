@@ -16,13 +16,12 @@ services:
       - umbnet
     healthcheck:
       # This healthcheck is to make sure that the database is up and running before the umbraco container starts.
-      # It works by querying the database for the state of the umbracoDb database, ensuring it exists.
-      test: ["CMD", "/bin/bash", "/healthcheck.sh"]  # Use CMD format instead of shell format
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s # Bootstrap duration, for this duration failures does not count towards max retries.
-      start_interval: 5s # How long after the health check has started to run the healthcheck again.
+      test: ["CMD", "/bin/bash", "/healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s  # Give SQL Server more time to start initially
+      start_interval: 5s
 
   umb01:
     image: umb01
