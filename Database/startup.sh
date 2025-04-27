@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# Hardcoded password for testing
-DB_PASSWORD="Password1234"
-
 # Taken from: https://github.com/CarlSargunar/Umbraco-Docker-Workshop
 if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
   echo "Starting SQL Server"
@@ -24,7 +21,7 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
             echo "SQL Server process found, checking connectivity..."
             
             # Try to connect to SQL Server
-            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -Q "SELECT 1" &> /dev/null
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -Q "SELECT 1" &> /dev/null
             if [ $? -eq 0 ]; then
               echo "SQL Server is ready, running setup script..."
               ready=1
@@ -49,7 +46,7 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
       fi
 
       echo "Running setup script..."
-      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -d master -i setup.sql
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -d master -i setup.sql
       
       if [ $? -eq 0 ]; then
         echo "Database setup completed successfully"
