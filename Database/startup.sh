@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Hardcoded password for testing
+DB_PASSWORD="Password1234"
+
 # Taken from: https://github.com/CarlSargunar/Umbraco-Docker-Workshop
 if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
   echo "Starting SQL Server"
@@ -12,19 +15,41 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
     # Initialize the application database asynchronously in a background process
     function initialize_app_database() {
       echo "Waiting for SQL Server to start..."
-      # Instead of a fixed sleep, actively check if SQL Server is accepting connections
-      for i in {1..30}; do
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -Q "SELECT 1" &> /dev/null
-        if [ $? -eq 0 ]; then
-          echo "SQL Server is ready, running setup script..."
+      # More robust SQL Server startup detection
+      ready=0
+      for i in {1..60}; do
+        if [ $ready -eq 0 ]; then
+          # Check if SQL Server process is running
+          if pgrep -x "sqlservr" > /dev/null; then
+            echo "SQL Server process found, checking connectivity..."
+            
+            # Try to connect to SQL Server
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -Q "SELECT 1" &> /dev/null
+            if [ $? -eq 0 ]; then
+              echo "SQL Server is ready, running setup script..."
+              ready=1
+            else
+              echo "SQL Server process is running but not yet accepting connections (attempt $i/60)..."
+            fi
+          else
+            echo "SQL Server process not found yet (attempt $i/60)..."
+          fi
+        fi
+        
+        if [ $ready -eq 0 ]; then
+          sleep 2
+        else
           break
         fi
-        echo "Waiting for SQL Server to start (attempt $i/30)..."
-        sleep 2
       done
+      
+      if [ $ready -eq 0 ]; then
+        echo "SQL Server did not become ready in the allocated time"
+        exit 1
+      fi
 
       echo "Running setup script..."
-      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -d master -i setup.sql
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -d master -i setup.sql
       
       if [ $? -eq 0 ]; then
         echo "Database setup completed successfully"
@@ -35,6 +60,8 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
         echo "Database setup failed"
       fi
     }
+    
+    # Start initialization in the background
     initialize_app_database &
   else
     echo "Container already initialized"

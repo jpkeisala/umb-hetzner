@@ -5,8 +5,8 @@ services:
       context: ./Database
     environment:
       ACCEPT_EULA: "Y" 
-      SA_PASSWORD: ${DB_PASSWORD}
-      MSSQL_SA_PASSWORD: ${DB_PASSWORD}
+      SA_PASSWORD: "Password1234"
+      MSSQL_SA_PASSWORD: "Password1234"
     ports:
       - "1433:1433"
       - "1434:1434"
@@ -17,17 +17,17 @@ services:
     healthcheck:
       # This healthcheck is to make sure that the database is up and running before the umbraco container starts.
       test: ["CMD", "/bin/bash", "/healthcheck.sh"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 40s  # Give SQL Server more time to start initially
-      start_interval: 5s
+      interval: 15s       # Increased interval between checks
+      timeout: 10s        # Increased timeout for each check
+      retries: 15         # More retries allowed
+      start_period: 60s   # More time for initial startup
+      start_interval: 10s # More time between checks during startup
 
   umb01:
     image: umb01
     environment:
         - ASPNETCORE_ENVIRONMENT=Development
-        - ConnectionStrings__umbracoDbDSN=Server=umb_database;Database=umbracoDb;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true;
+        - ConnectionStrings__umbracoDbDSN=Server=umb_database;Database=umbracoDb;User Id=sa;Password=Password1234;TrustServerCertificate=true;
         - ConnectionStrings__umbracoDbDSN_ProviderName=Microsoft.Data.SqlClient
     volumes:
       - umb_media:/app/wwwroot/media
