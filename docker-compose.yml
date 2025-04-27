@@ -17,7 +17,7 @@ services:
     healthcheck:
       # This healthcheck is to make sure that the database is up and running before the umbraco container starts.
       # It works by querying the database for the state of the umbracoDb database, ensuring it exists.
-      test: ./healthcheck.sh
+      test: ["CMD", "/bin/bash", "/healthcheck.sh"]  # Use CMD format instead of shell format
       interval: 15s
       timeout: 10s
       retries: 5

@@ -17,5 +17,9 @@ COPY setup.sql /
 COPY startup.sh /
 COPY healthcheck.sh /
 
+# Make sure scripts are executable
+RUN chmod +x /healthcheck.sh
+RUN chmod +x /startup.sh
+
 ENTRYPOINT [ "/bin/bash", "startup.sh" ]
 CMD [ "/opt/mssql/bin/sqlservr" ]
