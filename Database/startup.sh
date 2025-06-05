@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x  # Enable debug output
 
 # Taken from: https://github.com/CarlSargunar/Umbraco-Docker-Workshop
 if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
@@ -46,7 +47,7 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
       fi
 
       echo "Running setup script..."
-      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -d master -i setup.sql
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -d master -i setup.sql > /tmp/setup.log 2>&1
       
       if [ $? -eq 0 ]; then
         echo "Database setup completed successfully"
@@ -54,7 +55,9 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
         touch /tmp/app-initialized
         echo "Container initialization complete"
       else
-        echo "Database setup failed"
+        echo "Database setup failed. Dumping setup.log:"
+        cat /tmp/setup.log
+        exit 1
       fi
     }
     
