@@ -35,8 +35,6 @@ if [[ $value -gt 0 ]]; then
   echo "Database umbracoDb exists and is accessible"
   exit 0
 else
-  echo "Database umbracoDb does not exist yet, but SQL Server is running"
-  # If SQL Server is running but database doesn't exist yet, consider it healthy
-  # The startup script will create the database
-  exit 0
+  echo "Database umbracoDb does not exist yet, healthcheck will fail until it is created"
+  exit 1
 fi
