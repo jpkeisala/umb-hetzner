@@ -58,8 +58,8 @@ if [ "$1" = '/opt/mssql/bin/sqlservr' ]; then
       fi
     }
     
-    # Start initialization in the background
-    initialize_app_database &
+    # Start initialization synchronously
+    initialize_app_database
   else
     echo "Container already initialized"
   fi
